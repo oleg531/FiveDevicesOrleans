@@ -1,5 +1,5 @@
 obj/
 .vs/
 bin/
-FiveDevicesOrleans/project.lock.json
-FiveDevicesOrleans/packages
+project.lock.json
+packages
