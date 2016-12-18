@@ -1,11 +1,9 @@
-using System;
-using System.Threading.Tasks;
-
-using Orleans;
-using Orleans.Runtime.Configuration;
-
 namespace FiveDevicesOrleans
 {
+    using System;
+    using System.Threading.Tasks;
+    using Orleans;
+    using Orleans.Runtime.Configuration;
     using System.Linq;
     using Grain;
     using Receiver;
@@ -28,9 +26,12 @@ namespace FiveDevicesOrleans
 
             var config = ClientConfiguration.LocalhostSilo();
             GrainClient.Initialize(config);
-            
+
             //Start devices - grains
-            var grains = Enumerable.Range(0, 5).Select(x => GrainClient.GrainFactory.GetGrain<IDeviceGrain>(x)).ToList();
+            var grains =
+                Enumerable.Range(0, StaticConfiguration.DeviceCount)
+                    .Select(x => GrainClient.GrainFactory.GetGrain<IDeviceGrain>(x))
+                    .ToList();
             var receiver = new TemperatureReceiver();
             var receiverObj = GrainClient.GrainFactory.CreateObjectReference<ITemperatureReceiver>(receiver).Result;
             var subscribeTasks = grains.Select((g, i) => g.Subscribe(receiverObj));
@@ -41,29 +42,33 @@ namespace FiveDevicesOrleans
 
             while (true)
             {
-                Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                Task.Delay(TimeSpan.FromSeconds(StaticConfiguration.AvrgTemperatureCalcSeconds)).Wait();
                 var timeStampNow = DateTime.Now.Ticks;
                 var temperatures =
-                    receiver.MessagesDictionary.Values.Where(v => new TimeSpan(timeStampNow - v.TimeStamp).Seconds <= 3)
+                    receiver.MessagesDictionary.Values.Where(
+                            v =>
+                                new TimeSpan(timeStampNow - v.TimeStamp).Seconds <=
+                                StaticConfiguration.AvrgTemperaturePeriodCalcSeconds)
                         .ToList();
                 var averageTemperature = temperatures.Count > 0 ? temperatures.Average(v => v.Temperature) : 0;
-                
-                //todo clear                
-                var keysToRemove =
-                    receiver.MessagesDictionary.Where(
-                            kvp => new TimeSpan(timeStampNow - kvp.Value.TimeStamp).Seconds > 3)
-                        .Select(kvp => kvp.Key)
-                        .ToList();
 
+                //remove old values
                 Task.Run(() =>
                 {
+                    var keysToRemove =
+                        receiver.MessagesDictionary.Where(
+                                kvp =>
+                                    new TimeSpan(timeStampNow - kvp.Value.TimeStamp).Seconds >
+                                    StaticConfiguration.AvrgTemperaturePeriodCalcSeconds)
+                            .Select(kvp => kvp.Key)
+                            .ToList();
                     DeviceMessage notUsedValue;
                     keysToRemove.ForEach(k => receiver.MessagesDictionary.TryRemove(k, out notUsedValue));
                 });
 
                 Console.WriteLine(
                     $"AverageTemperature: {averageTemperature:F}, TimeStamp: {timeStampNow}, Second: {new DateTime(timeStampNow).Second}, CountDictionary: {receiver.MessagesDictionary.Count}");
-            }            
+            }
             //Console.ReadLine();
             hostDomain.DoCallBack(ShutdownSilo);
         }

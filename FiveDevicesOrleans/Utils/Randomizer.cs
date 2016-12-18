@@ -11,12 +11,14 @@
             _randomizer = new Random();
         }
 
-        public static int GetRandomTemperature(int minValue = 0, int maxValue = 100)
+        public static int GetRandomTemperature(int minValue = StaticConfiguration.TemperatureMinValue,
+            int maxValue = StaticConfiguration.TemperatureMaxValue)
         {
             return GetRandomIntValue(minValue, maxValue);
         }
 
-        public static int GetRandomDelayInSeconds(int minValue = 0, int maxValue = 5)
+        public static int GetRandomDelayInSeconds(int minValue = StaticConfiguration.DelayInSecondsMinValue,
+            int maxValue = StaticConfiguration.DelayInSecondsMaxValue)
         {
             return GetRandomIntValue(minValue, maxValue);
         }

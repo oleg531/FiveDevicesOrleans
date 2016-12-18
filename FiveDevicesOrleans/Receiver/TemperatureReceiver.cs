@@ -16,7 +16,7 @@
         {
             var key = $"{deviceMessage.DeviceId}_{deviceMessage.TimeStamp}";
             MessagesDictionary.TryAdd(key, deviceMessage);
-            if (deviceMessage.Temperature > 85)
+            if (deviceMessage.Temperature > StaticConfiguration.TemperatureThreshold)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine(
