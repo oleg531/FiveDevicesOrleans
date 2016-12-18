@@ -18,7 +18,7 @@
             MessagesDictionary.TryAdd(key, deviceMessage);
             if (deviceMessage.Temperature > StaticConfiguration.TemperatureThreshold)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine(
                     $"Threshold reached! DeviceId: {deviceMessage.DeviceId} , Temperature: {deviceMessage.Temperature}, TimeStamp: {new DateTime(deviceMessage.TimeStamp):G}");
                 Console.ResetColor();

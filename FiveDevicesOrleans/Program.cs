@@ -40,7 +40,7 @@ namespace FiveDevicesOrleans
 
             Console.WriteLine("Orleans Silo is running.\nPress Enter to terminate...");
 
-            while (true)
+            while (!Console.KeyAvailable)
             {
                 Task.Delay(TimeSpan.FromSeconds(StaticConfiguration.AvrgTemperatureCalcSeconds)).Wait();
                 var timeStampNow = DateTime.Now.Ticks;
@@ -68,8 +68,7 @@ namespace FiveDevicesOrleans
 
                 Console.WriteLine(
                     $"AverageTemperature: {averageTemperature:F}, TimeStamp: {timeStampNow}, Second: {new DateTime(timeStampNow).Second}, CountDictionary: {receiver.MessagesDictionary.Count}");
-            }
-            //Console.ReadLine();
+            }            
             hostDomain.DoCallBack(ShutdownSilo);
         }
 
