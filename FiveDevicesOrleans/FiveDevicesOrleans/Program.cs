@@ -6,6 +6,7 @@ using Orleans.Runtime.Configuration;
 
 namespace FiveDevicesOrleans
 {
+    using System.Linq;
     using Grain;
     using Receiver;
 
@@ -27,18 +28,43 @@ namespace FiveDevicesOrleans
 
             var config = ClientConfiguration.LocalhostSilo();
             GrainClient.Initialize(config);
-
-            // TODO: once the previous call returns, the silo is up and running.
-            //       This is the place your custom logic, for example calling client logic
-            //       or initializing an HTTP front end for accepting incoming requests.
-            var deviceGrain = GrainClient.GrainFactory.GetGrain<IDeviceGrain>(0);
+            
+            //Start devices - grains
+            var grains = Enumerable.Range(0, 5).Select(x => GrainClient.GrainFactory.GetGrain<IDeviceGrain>(x)).ToList();
             var receiver = new TemperatureReceiver();
             var receiverObj = GrainClient.GrainFactory.CreateObjectReference<ITemperatureReceiver>(receiver).Result;
-            deviceGrain.Subscribe(receiverObj).Wait();
+            var subscribeTasks = grains.Select((g, i) => g.Subscribe(receiverObj));
+            Task.WhenAll(subscribeTasks);
+            grains.ForEach(g => g.StartEmitTemperature());
 
             Console.WriteLine("Orleans Silo is running.\nPress Enter to terminate...");
-            Console.ReadLine();
 
+            while (true)
+            {
+                Task.Delay(TimeSpan.FromSeconds(1)).Wait();
+                var timeStampNow = DateTime.Now.Ticks;
+                var temperatures =
+                    receiver.MessagesDictionary.Values.Where(v => new TimeSpan(timeStampNow - v.TimeStamp).Seconds <= 3)
+                        .ToList();
+                var averageTemperature = temperatures.Count > 0 ? temperatures.Average(v => v.Temperature) : 0;
+                
+                //todo clear                
+                var keysToRemove =
+                    receiver.MessagesDictionary.Where(
+                            kvp => new TimeSpan(timeStampNow - kvp.Value.TimeStamp).Seconds > 3)
+                        .Select(kvp => kvp.Key)
+                        .ToList();
+
+                Task.Run(() =>
+                {
+                    DeviceMessage notUsedValue;
+                    keysToRemove.ForEach(k => receiver.MessagesDictionary.TryRemove(k, out notUsedValue));
+                });
+
+                Console.WriteLine(
+                    $"AverageTemperature: {averageTemperature:F}, TimeStamp: {timeStampNow}, Second: {new DateTime(timeStampNow).Second}, CountDictionary: {receiver.MessagesDictionary.Count}");
+            }            
+            //Console.ReadLine();
             hostDomain.DoCallBack(ShutdownSilo);
         }
 

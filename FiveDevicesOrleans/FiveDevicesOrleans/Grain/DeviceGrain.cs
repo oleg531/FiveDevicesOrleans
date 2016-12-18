@@ -1,17 +1,27 @@
 ﻿namespace FiveDevicesOrleans.Grain
 {
+    using System;
     using System.Threading.Tasks;
     using Orleans;
     using Receiver;
+    using Utils;
 
     public class DeviceGrain : Grain, IDeviceGrain
     {
         private ObserverSubscriptionManager<ITemperatureReceiver> _subscriptionManager;
+        private bool _emitTemperature;
 
         public override async Task OnActivateAsync()
         {
             _subscriptionManager = new ObserverSubscriptionManager<ITemperatureReceiver>();
+            _emitTemperature = false;
             await base.OnActivateAsync();
+        }
+
+        public Task StopEmitTemperature()
+        {
+            _emitTemperature = false;
+            return TaskDone.Done;
         }
 
         public async Task Subscribe(ITemperatureReceiver observer)
@@ -26,16 +36,25 @@
             await TaskDone.Done;
         }
 
-        public Task EmmitTemperature()
+        public Task StartEmitTemperature()
         {
-            _subscriptionManager.Notify(receiver =>
+            _emitTemperature = true;
+
+            while (_emitTemperature)
             {
-                receiver.ReceiveTemperature(new DeviceMessage
+                var delaySeconds = Randomizer.GetRandomDelayInSeconds();
+                Task.Delay(TimeSpan.FromSeconds(delaySeconds)).Wait();
+                _subscriptionManager.Notify(receiver =>
                 {
-                    DeviceId = this.GetPrimaryKeyString(),
-                    Temperature = 123
+                    receiver.ReceiveTemperature(new DeviceMessage
+                    {
+                        DeviceId = this.GetPrimaryKeyLong().ToString(),
+                        Temperature = Randomizer.GetRandomTemperature(),
+                        TimeStamp = DateTime.Now.Ticks
+                    });
                 });
-            });
+            }
+
             return TaskDone.Done;
         }
     }

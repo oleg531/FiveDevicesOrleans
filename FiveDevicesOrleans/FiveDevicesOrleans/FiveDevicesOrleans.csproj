@@ -101,6 +101,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Receiver\ITemperatureReceiver.cs" />
     <Compile Include="Receiver\TemperatureReceiver.cs" />
+    <Compile Include="Utils\Randomizer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

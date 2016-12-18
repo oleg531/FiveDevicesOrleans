@@ -6,7 +6,9 @@
 
     public interface IDeviceGrain : IGrainWithIntegerKey
     {
-        Task EmmitTemperature();
+        Task StartEmitTemperature();
+        Task StopEmitTemperature();
+
         Task Subscribe(ITemperatureReceiver observer);
         Task UnSubscribe(ITemperatureReceiver observer);
     }
