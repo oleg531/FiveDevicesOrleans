@@ -1,6 +1,5 @@
 ﻿namespace FiveDevicesOrleans.Tests.Utils
 {
-    using System.Threading;
     using FiveDevicesOrleans.Utils;
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
