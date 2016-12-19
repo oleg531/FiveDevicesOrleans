@@ -15,7 +15,7 @@
         public void ReceiveTemperature(DeviceMessage deviceMessage)
         {
             var key = $"{deviceMessage.DeviceId}_{deviceMessage.TimeStamp}";
-            MessagesDictionary.TryAdd(key, deviceMessage);
+            MessagesDictionary.AddOrUpdate(key, k => deviceMessage, (k, v) => deviceMessage);
             if (deviceMessage.Temperature > StaticConfiguration.TemperatureThreshold)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
@@ -23,6 +23,6 @@
                     $"Threshold reached! DeviceId: {deviceMessage.DeviceId} , Temperature: {deviceMessage.Temperature}, TimeStamp: {new DateTime(deviceMessage.TimeStamp):G}");
                 Console.ResetColor();
             }
-        }
+        }      
     }
 }

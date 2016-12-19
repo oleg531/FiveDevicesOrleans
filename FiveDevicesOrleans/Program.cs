@@ -43,32 +43,17 @@ namespace FiveDevicesOrleans
             while (!Console.KeyAvailable)
             {
                 Task.Delay(TimeSpan.FromSeconds(StaticConfiguration.AvrgTemperatureCalcSeconds)).Wait();
+
                 var timeStampNow = DateTime.Now.Ticks;
-                var temperatures =
-                    receiver.MessagesDictionary.Values.Where(
-                            v =>
-                                new TimeSpan(timeStampNow - v.TimeStamp).Seconds <=
-                                StaticConfiguration.AvrgTemperaturePeriodCalcSeconds)
-                        .ToList();
-                var averageTemperature = temperatures.Count > 0 ? temperatures.Average(v => v.Temperature) : 0;
+                var averageTemperature = receiver.CalculateAverageTemperatureForLastCalcPeriod(timeStampNow);
 
                 //remove old values
-                Task.Run(() =>
-                {
-                    var keysToRemove =
-                        receiver.MessagesDictionary.Where(
-                                kvp =>
-                                    new TimeSpan(timeStampNow - kvp.Value.TimeStamp).Seconds >
-                                    StaticConfiguration.AvrgTemperaturePeriodCalcSeconds)
-                            .Select(kvp => kvp.Key)
-                            .ToList();
-                    DeviceMessage notUsedValue;
-                    keysToRemove.ForEach(k => receiver.MessagesDictionary.TryRemove(k, out notUsedValue));
-                });
+                Task.Run(() => { receiver.RemoveTemperatureOldValues(timeStampNow); });
 
                 Console.WriteLine(
                     $"AverageTemperature: {averageTemperature:F}, TimeStamp: {timeStampNow}, Second: {new DateTime(timeStampNow).Second}, CountDictionary: {receiver.MessagesDictionary.Count}");
             }            
+
             hostDomain.DoCallBack(ShutdownSilo);
         }
 
