@@ -74,5 +74,63 @@
             // Assert
             averageTemp.ShouldBeEquivalentTo(0);
         }
+
+        [TestMethod]
+        public void RemoveTemperatureOldValues_WhenOldValuesPresent_ShouldRemoveOldValues()
+        {
+            // Arrange
+            var tr = new TemperatureReceiver();
+            var timeStampNow = DateTime.Now.Ticks;
+
+            var dm1 = new DeviceMessage
+            {
+                DeviceId = "123",
+                TimeStamp = new TimeSpan(timeStampNow).Subtract(TimeSpan.FromSeconds(StaticConfiguration.AvrgTemperaturePeriodCalcSeconds + 1)).Ticks,
+                Temperature = 50
+            };
+            tr.ReceiveTemperature(dm1);
+            var dm2 = new DeviceMessage
+            {
+                DeviceId = dm1.DeviceId + "123",
+                TimeStamp = timeStampNow,
+                Temperature = 50
+            };
+            tr.ReceiveTemperature(dm2);
+
+            // Act
+            tr.RemoveTemperatureOldValues(timeStampNow);
+
+            // Assert
+            tr.MessagesDictionary.Count.ShouldBeEquivalentTo(1);
+        }
+
+        [TestMethod]
+        public void RemoveTemperatureOldValues_WhenOldValuesDoNotPresent_ShouldNotRemoveValues()
+        {
+            // Arrange
+            var tr = new TemperatureReceiver();
+            var timeStampNow = DateTime.Now.Ticks;
+
+            var dm1 = new DeviceMessage
+            {
+                DeviceId = "123",
+                TimeStamp = timeStampNow,
+                Temperature = 50
+            };
+            tr.ReceiveTemperature(dm1);
+            var dm2 = new DeviceMessage
+            {
+                DeviceId = dm1.DeviceId + "123",
+                TimeStamp = timeStampNow,
+                Temperature = 50
+            };
+            tr.ReceiveTemperature(dm2);
+
+            // Act
+            tr.RemoveTemperatureOldValues(timeStampNow);
+
+            // Assert
+            tr.MessagesDictionary.Count.ShouldBeEquivalentTo(2);
+        }
     }
 }
