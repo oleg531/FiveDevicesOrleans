@@ -182,6 +182,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Grain\DeviceGrain.cs" />
     <Compile Include="Grain\DevicesSiloTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Receiver\TemperatureReceiverExtensions.Tests.cs" />
