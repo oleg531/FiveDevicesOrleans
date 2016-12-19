@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiveDevicesOrleans", "FiveDevicesOrleans\FiveDevicesOrleans.csproj", "{807884A0-CC8D-4518-8C5C-EB98A096DB2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiveDevicesOrleans.Tests", "FiveDevicesOrleans.Tests\FiveDevicesOrleans.Tests.csproj", "{CA38C5C5-8D26-4B3D-9162-58938EB14342}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{807884A0-CC8D-4518-8C5C-EB98A096DB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{807884A0-CC8D-4518-8C5C-EB98A096DB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{807884A0-CC8D-4518-8C5C-EB98A096DB2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA38C5C5-8D26-4B3D-9162-58938EB14342}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA38C5C5-8D26-4B3D-9162-58938EB14342}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA38C5C5-8D26-4B3D-9162-58938EB14342}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA38C5C5-8D26-4B3D-9162-58938EB14342}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
